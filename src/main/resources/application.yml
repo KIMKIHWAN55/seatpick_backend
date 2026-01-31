@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/postgres
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update  # ??? ? update (Entity ????? DB? ?? ??)
+    properties:
+      hibernate:
+        format_sql: true # ???? SQL? ?? ?? ??
+        show_sql: true   # ???? SQL? ??? ??
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
