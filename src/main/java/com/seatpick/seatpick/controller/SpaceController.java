@@ -23,6 +23,11 @@ public class SpaceController {
     private final SpaceService spaceService;
     private final SpaceRepository spaceRepository;
 
+    @GetMapping("/{id}")
+    public Space getSpace(@PathVariable Long id) {
+        return spaceService.getSpaceById(id);
+    }
+
     // GET /api/spaces/1/slots?date=2026-02-01
     @GetMapping("/{spaceId}/slots")
     public List<SlotDto> getSlots(

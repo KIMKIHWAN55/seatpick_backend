@@ -36,7 +36,11 @@ public class SpaceService {
         );
         spaceRepository.save(space);
     }
-
+    @Transactional(readOnly = true)
+    public Space getSpaceById(Long id) {
+        return spaceRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 공간을 찾을 수 없습니다."));
+    }
     @Transactional(readOnly = true)
     public List<SlotDto> getAvailableSlots(Long spaceId, LocalDate date) {
         // 1. 해당 요일의 운영 시간 조회
