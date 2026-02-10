@@ -37,4 +37,14 @@ public class BookingController {
     ) {
         return ResponseEntity.ok(bookingService.getMyBookings(userDetails.getUsername()));
     }
+
+    // 예약 취소 요청
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<String> cancelBooking(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        bookingService.cancelBooking(id, userDetails.getUsername());
+        return ResponseEntity.ok("예약이 취소되었습니다.");
+    }
 }

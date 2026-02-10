@@ -58,4 +58,8 @@ public class Reservation {
     public void confirm() {
         this.status = ReservationStatus.CONFIRMED;
     }
+
+    public void cancel() {
+        this.status = ReservationStatus.CANCELLED;
+    }
 }

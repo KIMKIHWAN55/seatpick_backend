@@ -94,4 +94,24 @@ public class BookingService {
                 ))
                 .collect(Collectors.toList());
     }
+
+    // 3. 예약 취소
+    @Transactional
+    public void cancelBooking(Long reservationId, String providerId) {
+        // 1. 요청한 유저 찾기
+        User user = userRepository.findByProviderId(providerId)
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        // 2. 예약 내역 찾기
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+
+        // 3. [중요] 내 예약인지 확인 (남의 거 취소 방지)
+        if (!reservation.getUserId().equals(user.getId())) {
+            throw new IllegalStateException("본인의 예약만 취소할 수 있습니다.");
+        }
+
+        // 4. 상태 변경 (CANCELLED)
+        reservation.cancel();
+    }
 }

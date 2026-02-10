@@ -6,6 +6,9 @@ import com.seatpick.seatpick.domain.type.ReservationStatus;
 import com.seatpick.seatpick.dto.SlotDto;
 import com.seatpick.seatpick.repository.AvailabilityRepository;
 import com.seatpick.seatpick.repository.ReservationRepository;
+import com.seatpick.seatpick.domain.entity.Space;
+import com.seatpick.seatpick.dto.SpaceCreateRequest;
+import com.seatpick.seatpick.repository.SpaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,18 @@ public class SpaceService {
 
     private final AvailabilityRepository availabilityRepository;
     private final ReservationRepository reservationRepository;
+    private final SpaceRepository spaceRepository;
+
+    @Transactional
+    public void createSpace(SpaceCreateRequest request) {
+        Space space = new Space(
+                request.getName(),
+                request.getLocation(),
+                request.getType(),
+                request.getOptions()
+        );
+        spaceRepository.save(space);
+    }
 
     @Transactional(readOnly = true)
     public List<SlotDto> getAvailableSlots(Long spaceId, LocalDate date) {
