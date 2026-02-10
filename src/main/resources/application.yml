@@ -24,12 +24,12 @@ spring:
       client:
         registration:
           google:
-            client-id: ${127897408593-vdr7cfkijvurser5sk6736tb618seq5b.apps.googleusercontent.com}
-            client-secret: ${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}
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
               - email
               - profile
 
 # ? ?????! ? ?? ?? ? ??? ??? (???? ??)
 jwt:
-  secret: VlwEyVlPKZ6yV9yVlwEyVlPKZ6yV9yVlwEyVlPKZ6yV9yVlwEyVlPKZ6yV9y==
+  secret: ${JWT_SECRET}
