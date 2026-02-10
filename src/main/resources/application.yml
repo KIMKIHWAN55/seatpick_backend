@@ -7,13 +7,29 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update  # ??? ? update (Entity ????? DB? ?? ??)
+      ddl-auto: update
     properties:
       hibernate:
-        format_sql: true # ???? SQL? ?? ?? ??
-        show_sql: true   # ???? SQL? ??? ??
+        format_sql: true
+        show_sql: true
 
   data:
     redis:
       host: localhost
       port: 6379
+
+  # ? redis ??? ??? 'spring' ?? ?? ?
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${127897408593-vdr7cfkijvurser5sk6736tb618seq5b.apps.googleusercontent.com}
+            client-secret: ${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}
+            scope:
+              - email
+              - profile
+
+# ? ?????! ? ?? ?? ? ??? ??? (???? ??)
+jwt:
+  secret: VlwEyVlPKZ6yV9yVlwEyVlPKZ6yV9yVlwEyVlPKZ6yV9yVlwEyVlPKZ6yV9y==
