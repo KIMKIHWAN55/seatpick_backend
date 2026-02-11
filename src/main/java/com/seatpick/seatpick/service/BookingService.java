@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List; // 👈 List 오류 해결용 import
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -79,39 +80,58 @@ public class BookingService {
     }
 
     // 내 예약 조회 (GET) - 🌟 이 부분이 꼭 있어야 합니다!
+// ✅ [수정 1] 내 예약 조회: 시간이 지났으면 상태를 'COMPLETED'로 변경해서 반환
     @Transactional(readOnly = true)
     public List<ReservationResponse> getMyBookings(String providerId) {
         User user = userRepository.findByProviderId(providerId)
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        LocalDateTime now = LocalDateTime.now(); // 현재 시간
+
         return reservationRepository.findByUserIdOrderByCreatedAtDesc(user.getId()).stream()
-                .map(r -> new ReservationResponse(
-                        r.getId(),
-                        r.getSpace().getName(),
-                        r.getDate(),
-                        r.getStartTime(),
-                        r.getEndTime(),
-                        r.getStatus().name()
-                ))
+                .map(r -> {
+                    // 예약 종료 시간 계산
+                    LocalDateTime endDateTime = LocalDateTime.of(r.getDate(), r.getEndTime());
+
+                    // 기본 상태 가져오기
+                    String status = r.getStatus().name();
+
+                    // 👇 [핵심 로직] 취소된 게 아닌데 시간이 지났다면? -> 'COMPLETED'(이용완료)로 보여주기
+                    if (r.getStatus() != ReservationStatus.CANCELLED && endDateTime.isBefore(now)) {
+                        status = "COMPLETED";
+                    }
+
+                    return new ReservationResponse(
+                            r.getId(),
+                            r.getSpace().getName(),
+                            r.getDate(),
+                            r.getStartTime(),
+                            r.getEndTime(),
+                            status // 계산된 상태 반환
+                    );
+                })
                 .collect(Collectors.toList());
     }
 
-    // 3. 예약 취소
+    // ✅ [수정 2] 예약 취소: 이미 지난 예약은 취소 못 하게 막기
     @Transactional
     public void cancelBooking(Long reservationId, String providerId) {
-        // 1. 요청한 유저 찾기
         User user = userRepository.findByProviderId(providerId)
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
-        // 2. 예약 내역 찾기
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
 
-        // 3. [중요] 내 예약인지 확인 (남의 거 취소 방지)
         if (!reservation.getUserId().equals(user.getId())) {
             throw new IllegalStateException("본인의 예약만 취소할 수 있습니다.");
         }
 
-        // 4. 상태 변경 (CANCELLED)
+        // 👇 [추가] 시작 시간이 이미 지났으면 취소 불가!
+        LocalDateTime startDateTime = LocalDateTime.of(reservation.getDate(), reservation.getStartTime());
+        if (startDateTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("이미 지난 예약은 취소할 수 없습니다.");
+        }
+
         reservation.cancel();
     }
 }

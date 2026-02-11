@@ -28,6 +28,21 @@ public class SpaceController {
         return spaceService.getSpaceById(id);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteSpace(@PathVariable Long id) {
+        spaceService.deleteSpace(id);
+        return ResponseEntity.ok("공간이 삭제되었습니다.");
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> updateSpace(
+            @PathVariable Long id,
+            @RequestBody SpaceCreateRequest request
+    ) {
+        spaceService.updateSpace(id, request);
+        return ResponseEntity.ok("공간이 수정되었습니다!");
+    }
+
     // GET /api/spaces/1/slots?date=2026-02-01
     @GetMapping("/{spaceId}/slots")
     public List<SlotDto> getSlots(

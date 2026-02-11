@@ -40,4 +40,10 @@ public class Space {
         this.type = type;
         this.options = options;
     }
+    public void update(String name, String location, SpaceType type, Map<String, Object> options) {
+        this.name = name;
+        this.location = location;
+        this.type = type;
+        this.options = options;
+    }
 }
