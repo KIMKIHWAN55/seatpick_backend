@@ -54,12 +54,42 @@ public class Reservation {
         this.createdAt = LocalDateTime.now();
     }
 
+
     // 예약 확정 처리 메서드
     public void confirm() {
         this.status = ReservationStatus.CONFIRMED;
     }
 
+    // 1. 상태 변경 전 검증 로직을 포함한 cancel 메서드
     public void cancel() {
+        // 근거: 내 데이터(date, startTime)를 내가 직접 검증함
+        LocalDateTime startDateTime = LocalDateTime.of(this.date, this.startTime);
+        if (startDateTime.isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("이미 지난 예약은 취소할 수 없습니다.");
+        }
         this.status = ReservationStatus.CANCELLED;
+    }
+
+    // 2. 시간 중복 여부를 판단하는 비즈니스 계산 로직
+    public boolean isOverlappingWith(LocalDate requestDate, LocalTime requestStart, LocalTime requestEnd) {
+        // 날짜가 다르면 겹치지 않음
+        if (!this.date.equals(requestDate)) return false;
+        // 취소된 예약은 계산에서 제외
+        if (this.status == ReservationStatus.CANCELLED) return false;
+
+        // 시간 겹침 공식: (내 시작 < 요청 종료) AND (내 종료 > 요청 시작)
+        return this.startTime.isBefore(requestEnd) && this.endTime.isAfter(requestStart);
+    }
+    public String calculateDisplayStatus(LocalDateTime now) {
+        if (this.status == ReservationStatus.CANCELLED) {
+            return "CANCELLED";
+        }
+
+        LocalDateTime endDateTime = LocalDateTime.of(this.date, this.endTime);
+        if (endDateTime.isBefore(now)) {
+            return "COMPLETED"; // DB 상태와 별개로 시간이 지났으면 '이용완료'
+        }
+
+        return this.status.name();
     }
 }

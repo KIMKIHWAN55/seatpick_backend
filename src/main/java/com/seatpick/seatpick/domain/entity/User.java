@@ -1,5 +1,6 @@
 package com.seatpick.seatpick.domain.entity;
 
+import com.seatpick.seatpick.domain.type.UserRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -27,6 +28,9 @@ public class User {
     private String provider; // "google" 또는 "local" (일반가입)
     private String providerId; // 구글에서 주는 고유 ID (sub 값)
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
     // 회원가입용 빌더
     @Builder
     public User(String email, String name, String password, String provider, String providerId) {
@@ -37,9 +41,18 @@ public class User {
         this.providerId = providerId;
     }
 
-    // 소셜 로그인 시, 이름이 바뀌었으면 업데이트 해주는 메서드
+    public boolean isOwner() {
+        return this.role == UserRole.OWNER;
+    }
+
+    // 소셜 로그인 시 이름 업데이트
     public User update(String name) {
         this.name = name;
         return this;
+    }
+
+    // 필요 시 사장님으로 등업해주는 메서드
+    public void upgradeToOwner() {
+        this.role = UserRole.OWNER;
     }
 }

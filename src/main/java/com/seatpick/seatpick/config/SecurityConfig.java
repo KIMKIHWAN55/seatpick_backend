@@ -37,16 +37,23 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // API 서버라 CSRF 보안 끔
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 프론트엔드(3000번) 허용
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // 세션 안 씀 (JWT 쓸거라)
+                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**", "/api/spaces/**", "/login/**", "/oauth2/**").permitAll() // 로그인, 회원가입, 공간조회는 누구나 가능
-                        .anyRequest().authenticated() // 나머지는 로그인해야 가능
+                        // 1. 누구나 접근 가능한 경로 (조회성 API)
+                        .requestMatchers("/api/auth/**", "/api/spaces/**", "/login/**", "/oauth2/**").permitAll()
+
+                        // 2. 유저 정보 관련 (로그인이 반드시 필요함)
+                        .requestMatchers("/api/users/**").authenticated()
+
+                        // 3. 나머지 모든 요청도 인증 필요
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2SuccessHandler) // 성공하면 이 핸들러 실행해라!
+                        .successHandler(oAuth2SuccessHandler)
                 )
+                // 중요: JWT 필터가 UsernamePasswordAuthenticationFilter보다 먼저 실행되어야 함
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

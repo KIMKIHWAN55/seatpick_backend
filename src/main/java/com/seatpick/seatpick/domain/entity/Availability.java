@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -34,5 +36,16 @@ public class Availability {
         this.dayOfWeek = dayOfWeek;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    // 특정 시간이 운영 종료 시간 이전인지 확인하는 로직
+    public boolean isBeforeEndTime(LocalTime time) {
+        return time.isBefore(this.endTime);
+    }
+
+    // 특정 날짜와 시간이 현재보다 과거인지 판단하는 로직
+    public boolean isPast(LocalDate date, LocalTime time, LocalDateTime now) {
+        LocalDateTime targetDateTime = LocalDateTime.of(date, time);
+        return targetDateTime.isBefore(now);
     }
 }
